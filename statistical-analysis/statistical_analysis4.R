@@ -31,6 +31,7 @@ setwd(file.path(dirname(dirname(getwd()))))
 # Create output directories if they don't exist
 dir.create("output", showWarnings = FALSE)
 dir.create(file.path("output", "tables"), showWarnings = FALSE)
+dir.create(file.path("output", "plots"), showWarnings = FALSE)
 
 # Set up data -------------------------------------------------------------
 
@@ -538,7 +539,7 @@ combined_plot <- combined_plot + plot_layout(guides = 'collect') &
   guides(fill = guide_legend(title = NULL))
 
 # Save the combined plot to a file
-ggsave("output/descriptive_plots.png", combined_plot, width = 10, height = 8)
+ggsave("output/plots/descriptive_plots.png", combined_plot, width = 10, height = 8)
 
 
 
@@ -607,7 +608,7 @@ combined_boxplots <- combined_boxplots + plot_layout(guides = 'collect') &
   theme(legend.position = "none") 
 
 # Save the combined plot to a file
-ggsave("output/descriptive_boxplots.png", combined_boxplots, width = 10, height = 5)
+ggsave("output/plots/descriptive_boxplots.png", combined_boxplots, width = 10, height = 5)
 
 
 
@@ -757,7 +758,7 @@ fcombined_plot <- plot_grid(combined_plot, plot3,
                             labels = c("A", "B"))
 
 print(fcombined_plot)
-ggsave("output/results2_combined_coef.pdf", fcombined_plot, width = 20, height = 14, units = "cm")
+ggsave("output/plots/results2_combined_coef.pdf", fcombined_plot, width = 20, height = 14, units = "cm")
 
 
  
@@ -901,7 +902,7 @@ fcombined_plot <- plot_grid(plot4f, plot4m,
                             labels = c("A", "B"))
 
 print(fcombined_plot)
-ggsave("output/results4_combined_coef.pdf", fcombined_plot, width = 20, height = 18, units = "cm")
+ggsave("output/plots/results4_combined_coef.pdf", fcombined_plot, width = 20, height = 18, units = "cm")
 
 
 
@@ -947,7 +948,7 @@ plot1 <- my_dwplot(data = m1_terms,
                    labels = c("Happiness"))
 
 plot1 <- plot1 + theme(legend.position = "none")
-ggsave("output/results2a_coef_full.pdf", width = 20, height = 14, units = "cm")
+ggsave("output/plots/results2a_coef_full.pdf", width = 20, height = 14, units = "cm")
 
 # A.6 Facial displays of happiness in all MOC images ----------------------
 
@@ -988,7 +989,7 @@ plot2 <- my_dwplot(data = m2_terms,
                    breaks = c("Happiness"),
                    labels = c("Happiness"))
 plot2 <- plot2 + theme(legend.position = "none")
-ggsave("output/results2b_coef_full.pdf", width = 20, height = 14, units = "cm")
+ggsave("output/plots/results2b_coef_full.pdf", width = 20, height = 14, units = "cm")
 
 
 
@@ -1037,7 +1038,7 @@ plot3 <- my_dwplot(data = m3_terms,
                    labels = c("Happiness"))
 
 plot3 <- plot3 + theme(legend.position = "none")
-ggsave("output/results2c_coef_full.pdf", width = 20, height = 14, units = "cm")
+ggsave("output/plots/results2c_coef_full.pdf", width = 20, height = 14, units = "cm")
 
 # A.8(a) Democratic gender differences in facial displays of happiness for all MOC faces --------
 
@@ -1078,7 +1079,7 @@ plotm5e <- my_dwplot(data = m5e_terms,
                      labels = c("Happiness"))
 
 plotm5e <- plotm5e + theme(legend.position = "none")
-ggsave("output/append_party_dem.pdf", width = 20, height = 14, units = "cm")
+ggsave("output/plots/append_party_dem.pdf", width = 20, height = 14, units = "cm")
 
 
 
@@ -1137,7 +1138,7 @@ plot5b <- my_dwplot(data = m5b_terms,
                     labels = c("Happiness"))
 
 plot5b <- plot5b + theme(legend.position = "none")
-ggsave("output/append_party_republican.pdf", width = 20, height = 14, units = "cm")
+ggsave("output/plots/append_party_republican.pdf", width = 20, height = 14, units = "cm")
 
 
 
