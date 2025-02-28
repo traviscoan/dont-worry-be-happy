@@ -156,10 +156,3 @@ plt.xticks(fontsize=10)
 plt.yticks(np.arange(0.40, 0.95, 0.05), fontsize=10)
 plt.ylim(0.40, 0.90)
 plt.savefig('f1_curve.pdf', bbox_inches='tight')
-
-path = '/Users/tcoan/git_repos/congress-faces-validation/data/validating_congress_faces.csv'
-
-df = pd.read_csv(path)
-
-# subset where attention1 = "I have a question"
-df = df[df['attention1'] == 'I have a question']

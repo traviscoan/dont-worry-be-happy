@@ -1,0 +1,1 @@
+1. cropped_predictions.tar.gz is the output from the face-detect-recognize library.  We should upload this to an online storage service and reference it.  We should also filter out the images that are from Twitter and only keep the ones from Facebook.
