@@ -5,7 +5,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import f1_score
 from scipy.optimize import minimize
 from sklearn.model_selection import KFold, StratifiedKFold
-
+import matplotlib.pyplot as plt
 
 def get_f1_score(threshold, data):
     '''
@@ -133,3 +133,33 @@ res = []
 threshold_values = np.linspace(start, stop, num=80, endpoint=True)
 for threshold in threshold_values.tolist():
     res.append(get_f1_score(threshold, opt_data))
+
+
+# Plot F1-score curve
+plt.figure(figsize=(8, 6))
+# Remove top and right spines
+plt.gca().spines['top'].set_visible(False)
+plt.gca().spines['right'].set_visible(False)
+# Remove top and right ticks
+plt.tick_params(top=False, right=False)
+
+plt.plot(threshold_values, res, linewidth=2)
+max_idx = np.argmax(res)
+plt.plot(threshold_values[max_idx], res[max_idx], 'ro')
+plt.annotate(f'({threshold_values[max_idx]:.3f}, {res[max_idx]:.3f})', 
+            (threshold_values[max_idx], res[max_idx]), 
+            xytext=(10, 10), textcoords='offset points',
+            fontsize=12)
+plt.xlabel('Threshold', fontsize=12)
+plt.ylabel('F1-score', fontsize=12)
+plt.xticks(fontsize=10)
+plt.yticks(np.arange(0.40, 0.95, 0.05), fontsize=10)
+plt.ylim(0.40, 0.90)
+plt.savefig('f1_curve.pdf', bbox_inches='tight')
+
+path = '/Users/tcoan/git_repos/congress-faces-validation/data/validating_congress_faces.csv'
+
+df = pd.read_csv(path)
+
+# subset where attention1 = "I have a question"
+df = df[df['attention1'] == 'I have a question']
