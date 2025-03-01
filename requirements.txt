@@ -3,3 +3,11 @@ facenet-pytorch
 scikit-learn
 retinaface-pytorch
 deepface
+opencv-python
+tqdm
+seaborn
+matplotlib
+numpy
+tarfile
+json
+concurrent.futures

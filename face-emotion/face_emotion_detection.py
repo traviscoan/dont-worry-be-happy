@@ -6,35 +6,17 @@ import cv2
 import numpy as np
 import tarfile
 import os
+import re
 import json
 import time
 import tarfile
-
-def search_file_in_tar(tar_path, target_file_name):
-    # Open the tar file in read mode
-    with tarfile.open(tar_path, 'r') as tar:
-        # Filter members to get only files that end with '.jpg'
-        members = [m for m in tar.getmembers() if m.isfile() and m.name.endswith('.jpg')]
-        # Check if the target file is in the filtered list
-        for member in members:
-            if target_file_name in member.name:
-                return True
-    # Return False if the file was not found in the tar
-    return False
-
-def list_first_five_files(tar_path):
-    # Open the tar file in read mode
-    with tarfile.open(tar_path, 'r') as tar:
-        # Filter members to get only files that end with '.jpg'
-        members = [m for m in tar.getmembers() if m.isfile() and m.name.endswith('.jpg')]
-        # Initialize a list to hold the names of the first five files
-        file_names = [member.name for member in members[:5]]
-        return file_names
+from concurrent.futures import ThreadPoolExecutor
+from tqdm import tqdm
 
 """#### Analyze images"""
 
-tarball_path = '/content/drive/MyDrive/dont_worry_be_happy/cropped_predictions.tar.gz'
-output_dir = '/content/drive/MyDrive/happiness_analysis/output'
+tarball_path = '../data/cropped_predictions.tar.gz'
+output_dir = '../output/emotion_processed_images'
 
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
@@ -135,11 +117,6 @@ for file in files:
 
 """### Delete Twitter output from output directory"""
 
-import os
-import re
-
-output_dir = '/content/drive/MyDrive/happiness_analysis/output'
-
 def is_twitter_image(filename):
     # Twitter images are identified by having at least one alphabetical character in the filename
     return re.search(r'[a-zA-Z]', filename)
@@ -161,39 +138,22 @@ for file in files:
 
 """## Data management"""
 
-# Load libraries to read data into colab
-from google.colab import files
-from google.colab import drive
-drive.mount('/content/drive/', force_remount=True)
-
-"""Change working directory:"""
-
-cd /content/drive/MyDrive/happiness_analysis
-
 """Append json files to a single one for download. Uses asynchronous execution."""
 
-import json
-import os
-from concurrent.futures import ThreadPoolExecutor
-from tqdm import tqdm
-
-# Define the directory containing the JSON files
-directory = '/content/drive/MyDrive/happiness_analysis/output/'
-
 # Define the output JSON file name
-output_filename = 'output_combined.json'
+output_filename = '../output/output_combined.json'
 
 # Function to load a single JSON file
 def load_json(filename):
     # Construct the full file path
-    file_path = os.path.join(directory, filename)
+    file_path = os.path.join(output_dir, filename)
     # Open and read the JSON file
     with open(file_path, 'r') as file:
         data = json.load(file)
     return data
 
 # Get a list of all JSON files in the directory
-json_files = [f for f in os.listdir(directory) if f.endswith('.json')]
+json_files = [f for f in os.listdir(output_dir) if f.endswith('.json')]
 
 # Use ThreadPoolExecutor to parallelize file reading
 with ThreadPoolExecutor() as executor:
@@ -205,7 +165,3 @@ with open(output_filename, 'w') as outfile:
     json.dump(results, outfile)
 
 print(f'All JSON files have been combined into {output_filename}')
-
-"""Count number of Facebook JSON files:"""
-
-!find output/ -type f | wc -l

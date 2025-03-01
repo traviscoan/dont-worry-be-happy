@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 import tarfile
 import os
 import json
@@ -10,8 +9,8 @@ import numpy as np
 from deepface import DeepFace
 
 # Define paths
-tarball_path = '/content/drive/MyDrive/dont_worry_be_happy2/validation_images.tar.gz'
-output_json_path = '/content/drive/MyDrive/happiness_analysis/validation_happiness_analysis.json'
+tarball_path = '../../data/validation_data/validation_images.tar.gz'
+output_json_path = '../../data/validation_data/validation_happiness_analysis.json'
 
 # Initialize list to store results
 emotion_results = []
