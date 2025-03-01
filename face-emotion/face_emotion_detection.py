@@ -9,43 +9,24 @@ import os
 import re
 import json
 import time
+import tarfile
 from concurrent.futures import ThreadPoolExecutor
 from tqdm import tqdm
 
 """#### Analyze images"""
 
 # Create directories if they don't exist
-data_dir = 'data'
+data_dir = 'data/cropped_predictions'
 output_dir = 'output/emotion_processed_images'
 os.makedirs(output_dir, exist_ok=True)
 
 # Define paths
-tarball_path = os.path.join(data_dir, 'cropped_predictions_facebook.tar.gz')
+tarball_path = os.path.join(data_dir, 'facebook.tar.gz')
 output_combined = os.path.join('output', 'output_combined.json')
 
 # Validate tarball existence and accessibility
 if not os.path.exists(tarball_path):
     raise FileNotFoundError(f"Tarball not found at: {tarball_path}")
-
-try:
-    with tarfile.open(tarball_path, "r:gz") as tar:
-        # Test reading the tarball
-        members = [m for m in tar.getmembers() if m.isfile() and m.name.endswith('.jpg')]
-        if not members:
-            raise ValueError("No .jpg files found in tarball")
-        
-        # Test reading first image to validate format
-        test_member = members[0]
-        try:
-            test_img = read_image_from_tar(tar, test_member)
-            if test_img is None:
-                raise ValueError("Failed to decode first image")
-            print(f"Successfully validated tarball. Found {len(members)} images.")
-        except Exception as e:
-            raise ValueError(f"Failed to read first image: {str(e)}")
-
-except tarfile.ReadError as e:
-    raise tarfile.ReadError(f"Failed to read tarball: {str(e)}")
 
 print(f"Processing tarball at {tarball_path}")
 
@@ -58,8 +39,10 @@ processed_files = 0
 error_files = 0
 unexpected_results = 0
 
+# Define a function to check if the filename indicates a Facebook image
 def is_facebook_image(filename):
     # Facebook images seem to follow a numeric pattern separated by underscores
+    # No need to split by '/' as filenames are directly provided without directory paths
     return re.match(r'^\d+(_\d+)+$', filename)
 
 with tarfile.open(tarball_path, "r:gz") as tar:
@@ -118,6 +101,28 @@ processing_time = end_time - start_time
 print(f"Processing complete. Total files processed: {processed_files}. Unexpected results: {unexpected_results}. Errors encountered: {error_files}.")
 print(f"Total processing time for Facebook images: {processing_time} seconds.")
 
+
+def is_twitter_image(filename):
+    # Twitter images are identified by having at least one alphabetical character in the filename
+    return re.search(r'[a-zA-Z]', filename)
+
+# List all files in the output directory
+files = os.listdir(output_dir)
+
+# Filter and delete files corresponding to Twitter images
+for file in files:
+    if file.endswith('.json'):  # Ensure we are only looking at JSON files
+        # Extract face_id (filename without the .json extension)
+        face_id = os.path.splitext(file)[0]
+
+        # Check if the file corresponds to a Twitter image
+        if is_twitter_image(face_id):
+            file_path = os.path.join(output_dir, file)
+            os.remove(file_path)  # Delete the file
+            print(f"Deleted Twitter image JSON: {file}")
+
+"""### Delete Twitter output from output directory"""
+
 def is_twitter_image(filename):
     # Twitter images are identified by having at least one alphabetical character in the filename
     return re.search(r'[a-zA-Z]', filename)
@@ -141,9 +146,11 @@ for file in files:
 
 """Append json files to a single one for download. Uses asynchronous execution."""
 
-# Combine JSON files
+# Function to load a single JSON file
 def load_json(filename):
+    # Construct the full file path
     file_path = os.path.join(output_dir, filename)
+    # Open and read the JSON file
     with open(file_path, 'r') as file:
         data = json.load(file)
     return data
