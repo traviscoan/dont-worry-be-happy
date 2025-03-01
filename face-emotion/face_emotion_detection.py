@@ -15,7 +15,7 @@ from tqdm import tqdm
 
 """#### Analyze images"""
 
-tarball_path = '../data/cropped_predictions.tar.gz'
+tarball_path = '../data/cropped_predictions_facebook.tar.gz'
 output_dir = '../output/emotion_processed_images'
 
 if not os.path.exists(output_dir):
