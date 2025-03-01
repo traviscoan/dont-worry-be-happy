@@ -16,12 +16,12 @@ from tqdm import tqdm
 """#### Analyze images"""
 
 # Create directories if they don't exist
-data_dir = 'data/cropped_predictions'
+data_dir = 'data'
 output_dir = 'output/emotion_processed_images'
 os.makedirs(output_dir, exist_ok=True)
 
 # Define paths
-tarball_path = os.path.join(data_dir, 'facebook.tar.gz')
+tarball_path = os.path.join(data_dir, 'cropped_predictions_facebook.tar.gz')
 output_combined = os.path.join('output', 'output_combined.json')
 
 # Validate tarball existence and accessibility
