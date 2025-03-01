@@ -6,11 +6,18 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix
 import os
 
+# Create directories if they don't exist
+output_dir = 'output/validation'
+os.makedirs(output_dir, exist_ok=True)
+
+data_validation_dir = 'data/validation_data'
+os.makedirs(data_validation_dir, exist_ok=True)
+
 # Read the human annotations
-df = pd.read_csv('../../data/validation_data/annotations.csv')
+df = pd.read_csv('data/validation_data/annotations.csv')
 
 # Load processed validation image data
-with open('../../data/validation_data/validation_happiness_analysis.json', 'r') as f:
+with open('data/validation_data/validation_happiness_analysis.json', 'r') as f:
     happiness_data = json.load(f)
 
 # Convert JSON data to DataFrame and merge
@@ -52,10 +59,6 @@ plt.ylabel('Human Label', fontsize=12)
 plt.xlabel('Machine Prediction', fontsize=12)
 plt.xticks(fontsize=12)
 plt.yticks(fontsize=12)
-
-# Create output directory if it doesn't exist
-output_dir = '../../output/validation'
-os.makedirs(output_dir, exist_ok=True)
 
 # Save the confusion matrix
 plt.savefig(os.path.join(output_dir, 'confusion_matrix_dominant_1.png'), bbox_inches='tight')
