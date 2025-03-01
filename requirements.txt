@@ -8,5 +8,3 @@ tqdm
 seaborn
 matplotlib
 numpy
-json
-concurrent.futures
