@@ -3,14 +3,17 @@ import tarfile
 import os
 import json
 import time
-import tarfile
 import cv2
 import numpy as np
 from deepface import DeepFace
 
+# Create directory if it doesn't exist
+data_validation_dir = 'data/validation_data'
+os.makedirs(data_validation_dir, exist_ok=True)
+
 # Define paths
-tarball_path = '../../data/validation_data/validation_images.tar.gz'
-output_json_path = '../../data/validation_data/validation_happiness_analysis.json'
+tarball_path = os.path.join(data_validation_dir, 'validation_images.tar.gz')
+output_json_path = os.path.join(data_validation_dir, 'validation_happiness_analysis.json')
 
 # Initialize list to store results
 emotion_results = []
