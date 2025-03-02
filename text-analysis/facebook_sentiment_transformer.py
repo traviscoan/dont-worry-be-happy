@@ -23,11 +23,13 @@ def preprocess(text):
     return " ".join(new_text)
 
 # Define paths
-data_dir = 'data'
-cardiff_model_dir = os.path.join(data_dir, 'cardiffnlp')
+data_dir = 'data'  # For input data
+cardiff_model_dir = 'cardiffnlp'  # Local to text-analysis directory
 output_dir = 'output/sentiment'
-os.makedirs(output_dir, exist_ok=True)
+
+# Create all necessary directories
 os.makedirs(cardiff_model_dir, exist_ok=True)
+os.makedirs(output_dir, exist_ok=True)
 
 # Tasks:
 # emoji, emotion, hate, irony, offensive, sentiment
@@ -36,8 +38,9 @@ os.makedirs(cardiff_model_dir, exist_ok=True)
 task = 'sentiment'
 MODEL = f"cardiffnlp/twitter-roberta-base-{task}"
 
-tokenizer = AutoTokenizer.from_pretrained(MODEL, model_max_length=512)
-
+# Set model cache directory to ensure models are saved in text-analysis/cardiffnlp
+os.environ['TRANSFORMERS_CACHE'] = cardiff_model_dir
+tokenizer = AutoTokenizer.from_pretrained(MODEL, model_max_length=512, cache_dir=cardiff_model_dir)
 
 '''
 If you receive the following error:
@@ -55,7 +58,7 @@ with urllib.request.urlopen(mapping_link) as f:
 labels = [row[1] for row in csvreader if len(row) > 1]
 
 # PT
-model = AutoModelForSequenceClassification.from_pretrained(MODEL)
+model = AutoModelForSequenceClassification.from_pretrained(MODEL, cache_dir=cardiff_model_dir)
 model.save_pretrained(os.path.join(cardiff_model_dir, f'twitter-roberta-base-{task}'))
 
 def get_roberta_sent(dict):
