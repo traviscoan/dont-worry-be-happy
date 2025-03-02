@@ -1,10 +1,11 @@
+deepface
 pandas
 facenet-pytorch
 scikit-learn
 retinaface-pytorch
-deepface
 opencv-python
 tqdm
 seaborn
 matplotlib
 numpy
+transformers
