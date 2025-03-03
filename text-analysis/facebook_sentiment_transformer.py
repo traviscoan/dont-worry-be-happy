@@ -87,7 +87,7 @@ def get_roberta_sent(dict):
     return dict
 
 print("Load text data")
-dir = "../../data"
+dir = "../data"
 rtext = pd.read_csv(dir + "/facebook_data.csv", keep_default_na=False, nrows=100)
 rtext = rtext.to_dict('records')
 
