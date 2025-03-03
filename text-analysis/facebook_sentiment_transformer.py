@@ -28,15 +28,24 @@ def preprocess(text):
 task = 'sentiment'
 MODEL = f"cardiffnlp/twitter-roberta-base-{task}"
 
-tokenizer = AutoTokenizer.from_pretrained(MODEL, model_max_length=512)
-
-
-'''
-If you receive the following error:
-OSError: Can't load tokenizer for 'cardiffnlp/twitter-roberta-base-sentiment'
-
-Delete /cardiffnlp directory and re-install model
-'''
+# Add error handling for tokenizer loading
+try:
+    tokenizer = AutoTokenizer.from_pretrained(MODEL, model_max_length=512)
+except OSError:
+    print("Error loading tokenizer. Attempting to force download...")
+    import shutil
+    import os
+    
+    # Check if there's a local cache and remove it
+    cache_dir = os.path.expanduser("~/.cache/huggingface/hub")
+    model_cache = os.path.join(cache_dir, "models--cardiffnlp--twitter-roberta-base-sentiment")
+    if os.path.exists(model_cache):
+        print(f"Removing existing cache at {model_cache}")
+        shutil.rmtree(model_cache, ignore_errors=True)
+    
+    # Force download the tokenizer
+    tokenizer = AutoTokenizer.from_pretrained(MODEL, model_max_length=512, force_download=True)
+    print("Tokenizer successfully downloaded.")
 
 # download label mapping
 labels = []
