@@ -153,9 +153,14 @@ output_base = os.path.dirname(os.path.dirname(os.path.abspath(facebook_data_path
 output_dir = os.path.join(output_base, "output", "sentiment")
 os.makedirs(output_dir, exist_ok=True)
 
-# Save to the output file
-output_file = os.path.join(output_dir, "facebook_sentiment_roberta.csv")
-print(f"Saving results to: {output_file}")
-df.to_csv(output_file, index=None)
+# Save to the output file as CSV
+output_file_csv = os.path.join(output_dir, "facebook_sentiment_roberta.csv")
+print(f"Saving results to CSV: {output_file_csv}")
+df.to_csv(output_file_csv, index=None)
+
+# Also save as JSON for easier parsing in other applications
+output_file_json = os.path.join(output_dir, "facebook_sentiment_roberta.json")
+print(f"Saving results to JSON: {output_file_json}")
+df.to_json(output_file_json, orient='records', indent=4)
 
 print("Finished!")

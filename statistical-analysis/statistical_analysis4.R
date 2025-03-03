@@ -36,7 +36,7 @@ dir.create(file.path("output", "plots"), showWarnings = FALSE)
 # Set up data -------------------------------------------------------------
 
 # Read image and text data
-data <- read_csv("data/complete_face_data.csv")
+data <- read_csv("output/complete_face_data.csv")
 names(data)[names(data) == "biogudie_sim"] <- "face_bioguide"
 
 # Drop duplicates
