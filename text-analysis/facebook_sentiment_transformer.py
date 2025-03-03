@@ -77,15 +77,43 @@ model.save_pretrained(MODEL)
 
 def get_roberta_sent(dict):
     text = preprocess(dict['message'])
-    encoded_input = tokenizer(text, return_tensors='pt', truncation=True)
-    output = model(**encoded_input)
-    scores = output[0][0].detach().numpy()
-    scores = softmax(scores)
-    sent_data =  {"roberta_negative": scores[0],
-              "roberta_neutral": scores[1],
-              "roberta_positive": scores[2]}
-    dict.update(sent_data)
-    return dict
+    
+    # Check if text is empty or too short after preprocessing
+    if not text or len(text.strip()) < 2:
+        print(f"Warning: Empty or very short text after preprocessing: '{dict['message']}'")
+        # Mark as invalid without assuming sentiment
+        dict.update({
+            "roberta_negative": 0,
+            "roberta_neutral": 0,
+            "roberta_positive": 0,
+            "sentiment_valid": False  # Flag to identify invalid entries
+        })
+        return dict
+    
+    try:
+        encoded_input = tokenizer(text, return_tensors='pt', truncation=True)
+        output = model(**encoded_input)
+        scores = output[0][0].detach().numpy()
+        scores = softmax(scores)
+        
+        sent_data = {
+            "roberta_negative": scores[0],
+            "roberta_neutral": scores[1],
+            "roberta_positive": scores[2],
+            "sentiment_valid": True
+        }
+        dict.update(sent_data)
+        return dict
+    except Exception as e:
+        print(f"Error processing text: '{text}'. Error: {str(e)}")
+        # Mark as invalid without assuming sentiment
+        dict.update({
+            "roberta_negative": 0,
+            "roberta_neutral": 0,
+            "roberta_positive": 0,
+            "sentiment_valid": False
+        })
+        return dict
 
 print("Load text data")
 dir = "../data"
