@@ -6,6 +6,7 @@ import time
 import cv2
 import numpy as np
 from deepface import DeepFace
+from tqdm import tqdm
 
 # Get the script's directory for robust path handling
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -74,7 +75,7 @@ with tarfile.open(tarball_path, "r:gz") as tar:
 
     start_time = time.time()  # Start timing
 
-    for member in members:
+    for member in tqdm(members, desc="Processing images", unit="img"):
         image_name = os.path.basename(member.name)  # Extract filename only
 
         try:
@@ -87,7 +88,6 @@ with tarfile.open(tarball_path, "r:gz") as tar:
                     'emotion': result['emotion'],
                     'dominant_emotion': result['dominant_emotion']
                 })
-                print(f"Processed {image_name} successfully.")
             else:
                 print(f"Unexpected result structure for {image_name}, skipping.")
 

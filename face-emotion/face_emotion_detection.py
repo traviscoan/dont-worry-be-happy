@@ -94,7 +94,8 @@ with tarfile.open(tarball_path, "r:gz") as tar:
     # Start processing time measurement
     start_time = time.time()
 
-    for member in members:  # Adjust this as needed for full processing
+    # Add tqdm progress bar
+    for member in tqdm(members, desc="Processing face images", unit="img"):
         face_id = os.path.splitext(os.path.basename(member.name))[0]
 
         # Check if the image is from Facebook
@@ -125,7 +126,6 @@ with tarfile.open(tarball_path, "r:gz") as tar:
                     json.dump(emotion_data, f)
 
                 processed_files += 1
-                print(f"Successfully processed {face_id}.")
             else:
                 unexpected_results += 1
                 print(f"Unexpected result structure for {face_id}, skipping.")
