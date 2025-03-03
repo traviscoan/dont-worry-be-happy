@@ -117,7 +117,7 @@ def get_roberta_sent(dict):
 
 print("Load text data")
 dir = "../data"
-rtext = pd.read_csv(dir + "/facebook_data.csv", keep_default_na=False, nrows=10)
+rtext = pd.read_csv(dir + "/facebook_data.csv", keep_default_na=False)
 rtext = rtext.to_dict('records')
 
 print("Apply Roberta model for sentiment analysis")
