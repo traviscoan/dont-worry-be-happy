@@ -36,7 +36,7 @@ for (package in required_packages) {
 }
 
 # Set working directory to project root (2 levels up from script location)
-setwd(file.path(dirname(dirname(getwd()))))
+setwd(file.path(dirname(getwd())))
 
 # Create output directories if they don't exist
 dir.create("output", showWarnings = FALSE)
