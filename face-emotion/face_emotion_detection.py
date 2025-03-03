@@ -16,7 +16,7 @@ from tqdm import tqdm
 """#### Analyze images"""
 
 # Create directories if they don't exist
-data_dir = 'data'
+data_dir = 'data/validation_data'
 output_dir = 'output/emotion_processed_images'
 os.makedirs(output_dir, exist_ok=True)
 

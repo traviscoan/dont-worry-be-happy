@@ -18,6 +18,10 @@ mkdir -p data
 echo "Unzipping data.zip..."
 unzip -o data.zip 
 
+# Run text analysis script
+echo "Running text analysis..."
+python text-analysis/facebook_sentiment_transformer.py
+
 # Run face emotion detection script
 echo "Running face emotion detection..."
 python face-emotion/face_emotion_detection.py
