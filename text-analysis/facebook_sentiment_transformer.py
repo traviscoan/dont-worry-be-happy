@@ -44,6 +44,9 @@ MODEL = f"cardiffnlp/twitter-roberta-base-{task}"
 # Set model cache directory to ensure models are saved in text-analysis/cardiffnlp
 os.environ['TRANSFORMERS_CACHE'] = cardiff_model_dir
 
+# Define device globally so it can be accessed from other functions
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 # Handle model loading with automatic retry
 def load_tokenizer_and_model(retry=True):
     global tokenizer, model
@@ -57,7 +60,6 @@ def load_tokenizer_and_model(retry=True):
         model.save_pretrained(os.path.join(cardiff_model_dir, f'twitter-roberta-base-{task}'))
         
         # Move model to GPU if available
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         model = model.to(device)
         print(f"Using device: {device}")
         return True
