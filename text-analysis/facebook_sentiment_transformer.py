@@ -90,9 +90,6 @@ def get_roberta_sent(dict):
         })
         return dict
     
-    # Print preprocessed text for debugging
-    print(f"Preprocessed text: '{text}'")
-    
     try:
         encoded_input = tokenizer(text, return_tensors='pt', truncation=True)
         output = model(**encoded_input)
@@ -120,7 +117,7 @@ def get_roberta_sent(dict):
 
 print("Load text data")
 dir = "../data"
-rtext = pd.read_csv(dir + "/facebook_data.csv", keep_default_na=False, nrows=100)
+rtext = pd.read_csv(dir + "/facebook_data.csv", keep_default_na=False, nrows=10)
 rtext = rtext.to_dict('records')
 
 print("Apply Roberta model for sentiment analysis")
@@ -130,7 +127,7 @@ print('Write data to disk')
 df = pd.DataFrame(results)
 
 # Create output directory if it doesn't exist
-output_dir = "./output/sentiment"
+output_dir = "../output/sentiment"
 os.makedirs(output_dir, exist_ok=True)  # This creates the directory if it doesn't exist
 
 # Save to the output file
