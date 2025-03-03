@@ -90,6 +90,9 @@ def get_roberta_sent(dict):
         })
         return dict
     
+    # Print preprocessed text for debugging
+    print(f"Preprocessed text: '{text}'")
+    
     try:
         encoded_input = tokenizer(text, return_tensors='pt', truncation=True)
         output = model(**encoded_input)
