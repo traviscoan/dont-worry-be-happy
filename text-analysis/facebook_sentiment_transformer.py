@@ -28,13 +28,28 @@ def preprocess(text):
 task = 'sentiment'
 MODEL = f"cardiffnlp/twitter-roberta-base-{task}"
 
-# Add error handling for tokenizer loading
+# Add enhanced error handling for tokenizer loading
 try:
     tokenizer = AutoTokenizer.from_pretrained(MODEL, model_max_length=512)
 except OSError:
-    print("Error loading tokenizer. Attempting to force download...")
+    print("Error loading tokenizer. Attempting to resolve issues and force download...")
     import shutil
     import os
+    
+    # Check if there's a local "cardiffnlp" directory in current or parent directory
+    current_dir = os.getcwd()
+    cardiff_dir_current = os.path.join(current_dir, "cardiffnlp")
+    cardiff_dir_parent = os.path.join(os.path.dirname(current_dir), "cardiffnlp")
+    
+    # Remove cardiffnlp directory if it exists in current directory
+    if os.path.exists(cardiff_dir_current):
+        print(f"Found conflicting local directory at {cardiff_dir_current}. Removing...")
+        shutil.rmtree(cardiff_dir_current, ignore_errors=True)
+    
+    # Remove cardiffnlp directory if it exists in parent directory
+    if os.path.exists(cardiff_dir_parent):
+        print(f"Found conflicting local directory at {cardiff_dir_parent}. Removing...")
+        shutil.rmtree(cardiff_dir_parent, ignore_errors=True)
     
     # Check if there's a local cache and remove it
     cache_dir = os.path.expanduser("~/.cache/huggingface/hub")
