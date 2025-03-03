@@ -143,7 +143,10 @@ rtext = pd.read_csv(facebook_data_path, keep_default_na=False)
 rtext = rtext.to_dict('records')
 
 print("Apply Roberta model for sentiment analysis")
-results = [get_roberta_sent(d) for d in tqdm(rtext)]
+# Use tqdm for progress display without printing each item
+results = []
+for d in tqdm(rtext, desc="Processing posts", unit="post"):
+    results.append(get_roberta_sent(d))
 
 print('Write data to disk')
 df = pd.DataFrame(results)
