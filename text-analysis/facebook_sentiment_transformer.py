@@ -11,6 +11,8 @@ import urllib.request
 import pandas as pd
 from tqdm import tqdm, trange
 import os
+import torch
+from torch.cuda.amp import autocast
 
 # Preprocess text (username and link placeholders)
 def preprocess(text):
@@ -61,25 +63,61 @@ labels = [row[1] for row in csvreader if len(row) > 1]
 model = AutoModelForSequenceClassification.from_pretrained(MODEL, cache_dir=cardiff_model_dir)
 model.save_pretrained(os.path.join(cardiff_model_dir, f'twitter-roberta-base-{task}'))
 
-def get_roberta_sent(dict):
-    text = preprocess(dict['message'])
-    encoded_input = tokenizer(text, return_tensors='pt', truncation=True)
-    output = model(**encoded_input)
-    scores = output[0][0].detach().numpy()
-    scores = softmax(scores)
-    sent_data =  {"roberta_negative": scores[0],
-              "roberta_neutral": scores[1],
-              "roberta_positive": scores[2]}
-    dict.update(sent_data)
-    return dict
+# Move model to GPU if available
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model = model.to(device)
+print(f"Using device: {device}")
+
+# Enable mixed precision for faster processing on modern GPUs
+from torch.cuda.amp import autocast
+
+def process_batch(batch_data, batch_size=32):
+    """Process data in batches for much faster inference"""
+    results = []
+    
+    for i in range(0, len(batch_data), batch_size):
+        current_batch = batch_data[i:i+batch_size]
+        texts = [preprocess(item['message']) for item in current_batch]
+        
+        # Tokenize all texts at once
+        encoded_inputs = tokenizer(texts, return_tensors='pt', padding=True, truncation=True)
+        
+        # Move inputs to the same device as model
+        encoded_inputs = {k: v.to(device) for k, v in encoded_inputs.items()}
+        
+        # Use mixed precision for faster computation
+        with autocast():
+            outputs = model(**encoded_inputs)
+        
+        # Process all outputs at once
+        scores = outputs[0].detach().cpu().numpy()
+        scores = softmax(scores, axis=1)
+        
+        for j, item in enumerate(current_batch):
+            item.update({
+                "roberta_negative": float(scores[j][0]),
+                "roberta_neutral": float(scores[j][1]),
+                "roberta_positive": float(scores[j][2])
+            })
+            results.append(item)
+    
+    return results
 
 # Load text data
 print("Load text data")
-facebook_data = pd.read_csv(os.path.join(data_dir, 'facebook_data.csv'), keep_default_na=False)
+facebook_data = pd.read_csv(os.path.join(data_dir, 'facebook_data.csv'), keep_default_na=False, low_memory=False)
 facebook_data = facebook_data.to_dict('records')
 
 print("Apply Roberta model for sentiment analysis")
-results = [get_roberta_sent(d) for d in tqdm(facebook_data)]
+# Determine optimal batch size based on available memory - adjust as needed
+batch_size = 128  # Try 64, 128, or 256 depending on your GPU memory
+results = []
+
+# Process in chunks to show progress
+chunk_size = 10000
+for i in tqdm(range(0, len(facebook_data), chunk_size)):
+    chunk = facebook_data[i:i+chunk_size]
+    results.extend(process_batch(chunk, batch_size=batch_size))
 
 print('Write data to disk')
 df = pd.DataFrame(results)
