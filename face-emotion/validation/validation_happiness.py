@@ -6,18 +6,76 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix
 import os
 
-# Create directories if they don't exist
-output_dir = 'output/validation'
-os.makedirs(output_dir, exist_ok=True)
+# Get the script's directory for robust path handling
+script_dir = os.path.dirname(os.path.abspath(__file__))
+validation_dir = script_dir
+project_root = os.path.dirname(os.path.dirname(script_dir))
 
-data_validation_dir = 'data/validation_data'
+# Try multiple possible locations for data directory
+possible_data_dirs = [
+    os.path.join(project_root, 'data'),  # From script location
+    os.path.join(os.getcwd(), 'data'),   # From current working directory
+    'data',                              # Relative to current directory
+    '../data',                           # One level up
+    '../../data'                         # Two levels up
+]
+
+data_dir = None
+for dir_path in possible_data_dirs:
+    if os.path.exists(dir_path) and os.path.isdir(dir_path):
+        data_dir = dir_path
+        print(f"Found data directory at: {data_dir}")
+        break
+
+if data_dir is None:
+    raise FileNotFoundError("Could not find data directory in any expected location")
+
+# Create directories if they don't exist
+data_validation_dir = os.path.join(data_dir, 'validation_data')
 os.makedirs(data_validation_dir, exist_ok=True)
 
+output_dir = os.path.join(project_root, 'output', 'validation')
+os.makedirs(output_dir, exist_ok=True)
+
+# Find annotation file
+possible_annotation_paths = [
+    os.path.join(data_validation_dir, 'annotations.csv'),
+    os.path.join(data_dir, 'annotations.csv'),
+    os.path.join(project_root, 'data', 'validation_data', 'annotations.csv'),
+]
+
+annotation_path = None
+for path in possible_annotation_paths:
+    if os.path.exists(path):
+        annotation_path = path
+        print(f"Found annotations at: {annotation_path}")
+        break
+
+if annotation_path is None:
+    raise FileNotFoundError("Could not find annotations.csv in any expected location")
+
+# Find validation results file
+possible_results_paths = [
+    os.path.join(data_validation_dir, 'validation_happiness_analysis.json'),
+    os.path.join(data_dir, 'validation_happiness_analysis.json'),
+    os.path.join(project_root, 'data', 'validation_data', 'validation_happiness_analysis.json'),
+]
+
+results_path = None
+for path in possible_results_paths:
+    if os.path.exists(path):
+        results_path = path
+        print(f"Found validation results at: {results_path}")
+        break
+
+if results_path is None:
+    raise FileNotFoundError("Could not find validation_happiness_analysis.json in any expected location")
+
 # Read the human annotations
-df = pd.read_csv('data/validation_data/annotations.csv')
+df = pd.read_csv(annotation_path)
 
 # Load processed validation image data
-with open('data/validation_data/validation_happiness_analysis.json', 'r') as f:
+with open(results_path, 'r') as f:
     happiness_data = json.load(f)
 
 # Convert JSON data to DataFrame and merge

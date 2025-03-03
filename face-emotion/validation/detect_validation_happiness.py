@@ -7,12 +7,52 @@ import cv2
 import numpy as np
 from deepface import DeepFace
 
-# Create directory if it doesn't exist
-data_validation_dir = 'data/validation_data'
+# Get the script's directory for robust path handling
+script_dir = os.path.dirname(os.path.abspath(__file__))
+validation_dir = script_dir
+project_root = os.path.dirname(os.path.dirname(script_dir))
+
+# Try multiple possible locations for data directory
+possible_data_dirs = [
+    os.path.join(project_root, 'data'),  # From script location
+    os.path.join(os.getcwd(), 'data'),   # From current working directory
+    'data',                              # Relative to current directory
+    '../data',                           # One level up
+    '../../data'                         # Two levels up
+]
+
+data_dir = None
+for dir_path in possible_data_dirs:
+    if os.path.exists(dir_path) and os.path.isdir(dir_path):
+        data_dir = dir_path
+        print(f"Found data directory at: {data_dir}")
+        break
+
+if data_dir is None:
+    raise FileNotFoundError("Could not find data directory in any expected location")
+
+# Create validation data directory
+data_validation_dir = os.path.join(data_dir, 'validation_data')
 os.makedirs(data_validation_dir, exist_ok=True)
 
 # Define paths
-tarball_path = os.path.join(data_validation_dir, 'validation_images.tar.gz')
+possible_tarball_paths = [
+    os.path.join(data_validation_dir, 'validation_images.tar.gz'),
+    os.path.join(data_dir, 'validation_images.tar.gz'),
+    os.path.join(project_root, 'data', 'validation_data', 'validation_images.tar.gz'),
+    os.path.join(os.getcwd(), 'data', 'validation_data', 'validation_images.tar.gz')
+]
+
+tarball_path = None
+for path in possible_tarball_paths:
+    if os.path.exists(path):
+        tarball_path = path
+        print(f"Found validation images tarball at: {tarball_path}")
+        break
+
+if tarball_path is None:
+    raise FileNotFoundError("Could not find validation_images.tar.gz in any expected location")
+
 output_json_path = os.path.join(data_validation_dir, 'validation_happiness_analysis.json')
 
 # Initialize list to store results
