@@ -93,7 +93,7 @@ labels = [row[1] for row in csvreader if len(row) > 1]
 # Enable mixed precision for faster processing on modern GPUs
 from torch.cuda.amp import autocast
 
-def process_batch(batch_data, batch_size=32):
+def process_batch(batch_data, batch_size=16):
     """Process data in batches for much faster inference"""
     results = []
     
@@ -122,6 +122,10 @@ def process_batch(batch_data, batch_size=32):
                 "roberta_positive": float(scores[j][2])
             })
             results.append(item)
+        
+        # Clear GPU cache after each batch to free memory
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
     
     return results
 
@@ -131,15 +135,18 @@ facebook_data = pd.read_csv(os.path.join(data_dir, 'facebook_data.csv'), keep_de
 facebook_data = facebook_data.to_dict('records')
 
 print("Apply Roberta model for sentiment analysis")
-# Determine optimal batch size based on available memory - adjust as needed
-batch_size = 128  # Try 64, 128, or 256 depending on your GPU memory
+# Reduce batch size to prevent out-of-memory errors
+batch_size = 16  # Reduced from 128 to 16
 results = []
 
-# Process in chunks to show progress
-chunk_size = 10000
+# Process in smaller chunks to avoid memory issues
+chunk_size = 1000  # Reduced from 10000 to 1000
 for i in tqdm(range(0, len(facebook_data), chunk_size)):
     chunk = facebook_data[i:i+chunk_size]
     results.extend(process_batch(chunk, batch_size=batch_size))
+    # Clear GPU cache between chunks
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
 
 print('Write data to disk')
 df = pd.DataFrame(results)
