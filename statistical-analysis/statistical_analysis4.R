@@ -35,6 +35,9 @@ for (package in required_packages) {
   )
 }
 
+# Set options for modelsummary
+options("modelsummary_format_numeric_latex" = "plain")
+
 # Set working directory to project root (2 levels up from script location)
 setwd(file.path(dirname(getwd())))
 
