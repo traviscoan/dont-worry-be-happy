@@ -13,6 +13,7 @@ from tqdm import tqdm, trange
 import os
 import torch
 from torch.cuda.amp import autocast
+import shutil
 
 # Preprocess text (username and link placeholders)
 def preprocess(text):
@@ -42,14 +43,42 @@ MODEL = f"cardiffnlp/twitter-roberta-base-{task}"
 
 # Set model cache directory to ensure models are saved in text-analysis/cardiffnlp
 os.environ['TRANSFORMERS_CACHE'] = cardiff_model_dir
-tokenizer = AutoTokenizer.from_pretrained(MODEL, model_max_length=512, cache_dir=cardiff_model_dir)
 
-'''
-If you receive the following error:
-OSError: Can't load tokenizer for 'cardiffnlp/twitter-roberta-base-sentiment'
+# Handle model loading with automatic retry
+def load_tokenizer_and_model(retry=True):
+    global tokenizer, model
+    try:
+        print(f"Loading tokenizer from {MODEL}...")
+        tokenizer = AutoTokenizer.from_pretrained(MODEL, model_max_length=512, cache_dir=cardiff_model_dir)
+        
+        print(f"Loading model from {MODEL}...")
+        # PT
+        model = AutoModelForSequenceClassification.from_pretrained(MODEL, cache_dir=cardiff_model_dir)
+        model.save_pretrained(os.path.join(cardiff_model_dir, f'twitter-roberta-base-{task}'))
+        
+        # Move model to GPU if available
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        model = model.to(device)
+        print(f"Using device: {device}")
+        return True
+        
+    except OSError as e:
+        print(f"Error loading model: {str(e)}")
+        if retry:
+            print(f"Attempting to fix by clearing the cache directory: {cardiff_model_dir}")
+            # Remove the cache directory
+            if os.path.exists(cardiff_model_dir):
+                shutil.rmtree(cardiff_model_dir)
+                os.makedirs(cardiff_model_dir, exist_ok=True)
+            
+            print("Retrying model download...")
+            return load_tokenizer_and_model(retry=False)  # Retry once without allowing further retries
+        else:
+            print("Failed to load model even after clearing cache. Please check your internet connection.")
+            raise
 
-Delete /cardiffnlp directory and re-install model
-'''
+# Try to load the model with automatic retry
+load_tokenizer_and_model()
 
 # download label mapping
 labels = []
@@ -58,15 +87,6 @@ with urllib.request.urlopen(mapping_link) as f:
     html = f.read().decode('utf-8').split("\n")
     csvreader = csv.reader(html, delimiter='\t')
 labels = [row[1] for row in csvreader if len(row) > 1]
-
-# PT
-model = AutoModelForSequenceClassification.from_pretrained(MODEL, cache_dir=cardiff_model_dir)
-model.save_pretrained(os.path.join(cardiff_model_dir, f'twitter-roberta-base-{task}'))
-
-# Move model to GPU if available
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model = model.to(device)
-print(f"Using device: {device}")
 
 # Enable mixed precision for faster processing on modern GPUs
 from torch.cuda.amp import autocast
