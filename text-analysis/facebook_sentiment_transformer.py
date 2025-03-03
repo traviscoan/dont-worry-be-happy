@@ -116,8 +116,30 @@ def get_roberta_sent(dict):
         return dict
 
 print("Load text data")
-dir = "../data"
-rtext = pd.read_csv(dir + "/facebook_data.csv", keep_default_na=False)
+# Use both relative and absolute path handling to make the script work from any location
+import os
+
+# Get the script's directory
+script_dir = os.path.dirname(os.path.abspath(__file__))
+# Navigate to data folder from script location
+data_path = os.path.join(os.path.dirname(script_dir), "data")
+
+# Check if the file exists at this location
+facebook_data_path = os.path.join(data_path, "facebook_data.csv")
+if not os.path.exists(facebook_data_path):
+    print(f"Could not find data at {facebook_data_path}")
+    print(f"Current working directory: {os.getcwd()}")
+    print(f"Looking for data in current directory...")
+    # Try to find data in the current working directory structure
+    if os.path.exists("data/facebook_data.csv"):
+        facebook_data_path = "data/facebook_data.csv"
+    elif os.path.exists("../data/facebook_data.csv"):
+        facebook_data_path = "../data/facebook_data.csv"
+    else:
+        raise FileNotFoundError(f"Could not locate facebook_data.csv in any expected location")
+
+print(f"Loading data from: {facebook_data_path}")
+rtext = pd.read_csv(facebook_data_path, keep_default_na=False)
 rtext = rtext.to_dict('records')
 
 print("Apply Roberta model for sentiment analysis")
@@ -126,11 +148,14 @@ results = [get_roberta_sent(d) for d in tqdm(rtext)]
 print('Write data to disk')
 df = pd.DataFrame(results)
 
-# Create output directory if it doesn't exist
-output_dir = "../output/sentiment"
-os.makedirs(output_dir, exist_ok=True)  # This creates the directory if it doesn't exist
+# Create output directory using the same base location as the data file
+output_base = os.path.dirname(os.path.dirname(os.path.abspath(facebook_data_path)))
+output_dir = os.path.join(output_base, "output", "sentiment")
+os.makedirs(output_dir, exist_ok=True)
 
 # Save to the output file
-df.to_csv(f"{output_dir}/facebook_sentiment_roberta.csv", index=None)
+output_file = os.path.join(output_dir, "facebook_sentiment_roberta.csv")
+print(f"Saving results to: {output_file}")
+df.to_csv(output_file, index=None)
 
 print("Finished!")
