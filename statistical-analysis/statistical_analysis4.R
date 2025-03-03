@@ -1,29 +1,39 @@
-library(tidyverse)
-library(ggplot2)
-library(ggExtra)
-library(ggeffects)
-library(lubridate)
-library(ggpmisc)
-library(gridExtra)
-library(grid)
-library(dotwhisker) # for coef plots
-library(lme4)
-library(broom.mixed)
-library(reshape2)
-library(stargazer)
-library(dplyr)
-library(fixest)
-library(multiwayvcov)
-library(cowplot)
-library(emmeans)
-library(patchwork)
-library(modelsummary)
-library(kableExtra)
-library(MASS)
-library(sandwich)
-library(lmtest)
-library(clubSandwich)
+# Check for required packages and install any that are missing
+required_packages <- c(
+  "tidyverse", "ggplot2", "ggExtra", "ggeffects", "lubridate", "ggpmisc", 
+  "gridExtra", "grid", "dotwhisker", "lme4", "broom.mixed", "reshape2", 
+  "stargazer", "dplyr", "fixest", "multiwayvcov", "cowplot", "emmeans", 
+  "patchwork", "modelsummary", "kableExtra", "MASS", "sandwich", 
+  "lmtest", "clubSandwich"
+)
 
+# Function to check and install missing packages
+install_if_missing <- function(packages) {
+  new_packages <- packages[!(packages %in% installed.packages()[,"Package"])]
+  if(length(new_packages) > 0) {
+    cat("Installing missing packages:", paste(new_packages, collapse=", "), "\n")
+    install.packages(new_packages, repos="https://cloud.r-project.org")
+  }
+}
+
+# Install missing packages
+install_if_missing(required_packages)
+
+# Load all packages, with error handling
+for (package in required_packages) {
+  tryCatch(
+    {
+      cat("Loading package:", package, "\n")
+      library(package, character.only = TRUE)
+    },
+    error = function(e) {
+      cat("Error loading", package, ":", conditionMessage(e), "\n")
+      cat("Attempting to install and reload...\n")
+      install.packages(package, repos="https://cloud.r-project.org")
+      library(package, character.only = TRUE)
+    }
+  )
+}
 
 # Set working directory to project root (2 levels up from script location)
 setwd(file.path(dirname(dirname(getwd()))))
