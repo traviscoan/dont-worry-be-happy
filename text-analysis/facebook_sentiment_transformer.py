@@ -10,6 +10,7 @@ import csv
 import urllib.request
 import pandas as pd
 from tqdm import tqdm, trange
+import os
 
 # Preprocess text (username and link placeholders)
 def preprocess(text):
@@ -96,6 +97,12 @@ results = [get_roberta_sent(d) for d in tqdm(rtext)]
 
 print('Write data to disk')
 df = pd.DataFrame(results)
-df.to_csv("./output/sentiment/facebook_sentiment_roberta.csv", index=None)
+
+# Create output directory if it doesn't exist
+output_dir = "./output/sentiment"
+os.makedirs(output_dir, exist_ok=True)  # This creates the directory if it doesn't exist
+
+# Save to the output file
+df.to_csv(f"{output_dir}/facebook_sentiment_roberta.csv", index=None)
 
 print("Finished!")
