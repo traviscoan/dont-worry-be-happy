@@ -144,7 +144,7 @@ def process_unique_messages(unique_messages, batch_size=8):
 
 # Load and preprocess data
 print("Loading data...")
-facebook_data = pd.read_csv(os.path.join(data_dir, 'facebook_data.csv'), keep_default_na=False, low_memory=False)
+facebook_data = pd.read_csv(os.path.join(data_dir, 'facebook_data.csv'), keep_default_na=False, low_memory=False, nrows=100)
 records = facebook_data.to_dict('records')
 
 # Extract unique messages for efficient processing
