@@ -432,7 +432,7 @@ bio_list <- desc_sample %>%
   pull(user_bioguide)
 
 # Bring in entire corpus from facebook_sentiment_roberta.csv and filter by bioguides in bio_list. Create new df
-fb_corpus <- read_csv("./data/facebook_sentiment_roberta.csv")
+fb_corpus <- read_csv("data/facebook_sentiment_roberta.csv")
 filtered_corpus <- fb_corpus %>%
   filter(bioguide %in% bio_list)
 corpus_df <- filtered_corpus
