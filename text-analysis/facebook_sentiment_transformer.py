@@ -14,6 +14,7 @@ import os
 import torch
 from torch.cuda.amp import autocast
 import shutil
+import torch.amp
 
 # Preprocess text (username and link placeholders)
 def preprocess(text):
@@ -93,9 +94,9 @@ with urllib.request.urlopen(mapping_link) as f:
 labels = [row[1] for row in csvreader if len(row) > 1]
 
 # Enable mixed precision for faster processing on modern GPUs
-from torch.cuda.amp import autocast
+import torch.amp
 
-def process_batch(batch_data, batch_size=4):  # Further reduced batch size
+def process_batch(batch_data, batch_size=8):  # Increased from 4 to 8
     """Process data in batches for much faster inference"""
     results = []
     
@@ -104,14 +105,14 @@ def process_batch(batch_data, batch_size=4):  # Further reduced batch size
         texts = [preprocess(item['message']) for item in current_batch]
         
         # Tokenize all texts at once
-        encoded_inputs = tokenizer(texts, return_tensors='pt', padding=True, truncation=True, max_length=256)  # Limit token length
+        encoded_inputs = tokenizer(texts, return_tensors='pt', padding=True, truncation=True, max_length=256)
         
         # Move inputs to the same device as model
         encoded_inputs = {k: v.to(device) for k, v in encoded_inputs.items()}
         
-        # Use mixed precision for faster computation
-        with torch.no_grad():  # Add no_grad to reduce memory usage
-            with autocast():
+        # Use mixed precision for faster computation (fixed warning)
+        with torch.no_grad():
+            with torch.amp.autocast('cuda' if str(device) == 'cuda' else 'cpu'):
                 outputs = model(**encoded_inputs)
         
         # Process all outputs at once
@@ -126,15 +127,9 @@ def process_batch(batch_data, batch_size=4):  # Further reduced batch size
             })
             results.append(item)
         
-        # Force garbage collection and clear GPU cache after each batch
-        import gc
-        gc.collect()
-        if torch.cuda.is_available():
+        # Clear GPU cache only occasionally to reduce overhead
+        if i % (batch_size * 5) == 0 and torch.cuda.is_available():
             torch.cuda.empty_cache()
-            
-        # Add a small delay to allow memory cleanup
-        import time
-        time.sleep(0.05)
     
     return results
 
@@ -144,24 +139,19 @@ facebook_data = pd.read_csv(os.path.join(data_dir, 'facebook_data.csv'), keep_de
 facebook_data = facebook_data.to_dict('records')
 
 print("Apply Roberta model for sentiment analysis")
-# Reduce batch size to prevent out-of-memory errors
-batch_size = 4  # Further reduced from 16 to 4
+# Increase batch size slightly for better efficiency 
+batch_size = 8  # Increased from 4 to 8
 results = []
 
-# Process in smaller chunks to avoid memory issues
-chunk_size = 200  # Further reduced from 1000 to 200
+# Process in larger chunks for efficiency
+chunk_size = 500  # Increased from 200 to 500
 for i in tqdm(range(0, len(facebook_data), chunk_size)):
     chunk = facebook_data[i:i+chunk_size]
     results.extend(process_batch(chunk, batch_size=batch_size))
-    # Force garbage collection and clear GPU cache between chunks
-    import gc
-    gc.collect()
+    
+    # Clear cache less frequently - only once per chunk
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
-    
-    # Add a small delay to allow memory cleanup
-    import time
-    time.sleep(0.1)
 
 print('Write data to disk')
 df = pd.DataFrame(results)
