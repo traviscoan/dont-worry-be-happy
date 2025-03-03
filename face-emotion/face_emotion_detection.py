@@ -15,18 +15,59 @@ from tqdm import tqdm
 
 """#### Analyze images"""
 
-# Create directories if they don't exist
-data_dir = 'data/validation_data'
-output_dir = 'output/emotion_processed_images'
+# Get the script's directory for robust path handling
+script_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(script_dir)
+
+# Try multiple possible locations for data directory
+possible_data_dirs = [
+    os.path.join(project_root, 'data'),  # From script location
+    os.path.join(os.getcwd(), 'data'),   # From current working directory
+    'data',                              # Relative to current directory
+    '../data'                            # One level up
+]
+
+data_dir = None
+for dir_path in possible_data_dirs:
+    if os.path.exists(dir_path) and os.path.isdir(dir_path):
+        data_dir = dir_path
+        print(f"Found data directory at: {data_dir}")
+        break
+
+if data_dir is None:
+    raise FileNotFoundError("Could not find data directory in any expected location")
+
+# Create output directory paths relative to project root
+output_dir = os.path.join(project_root, 'output', 'emotion_processed_images')
 os.makedirs(output_dir, exist_ok=True)
 
 # Define paths
-tarball_path = os.path.join(data_dir, 'cropped_predictions_facebook.tar.gz')
-output_combined = os.path.join('output', 'output_combined.json')
+validation_data_dir = os.path.join(data_dir, 'validation_data')
+tarball_path = os.path.join(validation_data_dir, 'cropped_predictions_facebook.tar.gz')
+output_combined = os.path.join(project_root, 'output', 'output_combined.json')
 
-# Validate tarball existence and accessibility
+# Check multiple possible locations for the tarball if not found
 if not os.path.exists(tarball_path):
-    raise FileNotFoundError(f"Tarball not found at: {tarball_path}")
+    print(f"Tarball not found at: {tarball_path}")
+    print("Searching for tarball in alternative locations...")
+    
+    alternative_paths = [
+        os.path.join(data_dir, 'cropped_predictions_facebook.tar.gz'),
+        os.path.join(project_root, 'data', 'validation_data', 'cropped_predictions_facebook.tar.gz'),
+        os.path.join(os.getcwd(), 'data', 'validation_data', 'cropped_predictions_facebook.tar.gz'),
+        'data/validation_data/cropped_predictions_facebook.tar.gz',
+        '../data/validation_data/cropped_predictions_facebook.tar.gz'
+    ]
+    
+    for alt_path in alternative_paths:
+        if os.path.exists(alt_path):
+            tarball_path = alt_path
+            print(f"Found tarball at alternative location: {tarball_path}")
+            break
+
+# Final validation
+if not os.path.exists(tarball_path):
+    raise FileNotFoundError(f"Tarball not found in any expected location. Please ensure 'cropped_predictions_facebook.tar.gz' exists in the data directory.")
 
 print(f"Processing tarball at {tarball_path}")
 
