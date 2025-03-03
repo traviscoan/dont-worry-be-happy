@@ -1162,6 +1162,7 @@ stargazer(m5b_modified,
 
 
 # Table A6: Summary statistics of social media reactions
+reactions_data <- data_merged[, c("pos_count", "like_count", "reactions")]
 stargazer(reactions_data, 
           out = "output/tables/table_a6_reactions_summary.tex",
           type = "latex", 
