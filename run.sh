@@ -31,9 +31,9 @@ mkdir -p "$OUTPUT_DIR/sentiment"
 mkdir -p "$OUTPUT_DIR/validation"
 
 # Run text analysis
-#echo "Running text analysis..."
-#cd "$PROJECT_DIR/text-analysis"
-#python facebook_sentiment_transformer.py
+echo "Running text analysis..."
+cd "$PROJECT_DIR/text-analysis"
+python facebook_sentiment_transformer.py
 
 # Run face emotion detection
 echo "Running face emotion detection..."
