@@ -10,6 +10,14 @@ OUTPUT_DIR="$PROJECT_DIR/output"
 
 echo "Starting face emotion detection pipeline..."
 
+# Install Python dependencies
+echo "Installing Python dependencies..."
+if [ -f requirements.txt ]; then
+    pip install -r requirements.txt
+else
+    echo "Warning: requirements.txt not found in the current directory."
+fi
+
 # Unzip data if it exists and hasn't been unzipped yet
 if [ -f data.zip ] && [ ! -d "$DATA_DIR" ]; then
     echo "Unzipping data.zip..."
@@ -23,9 +31,9 @@ mkdir -p "$OUTPUT_DIR/sentiment"
 mkdir -p "$OUTPUT_DIR/validation"
 
 # Run text analysis
-echo "Running text analysis..."
-cd "$PROJECT_DIR/text-analysis"
-python facebook_sentiment_transformer.py
+#echo "Running text analysis..."
+#cd "$PROJECT_DIR/text-analysis"
+#python facebook_sentiment_transformer.py
 
 # Run face emotion detection
 echo "Running face emotion detection..."
