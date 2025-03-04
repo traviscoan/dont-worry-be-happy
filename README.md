@@ -37,13 +37,13 @@ The analysis pipeline consists of the following steps:
 - Output: Sentiment analysis results stored in `output/sentiment/`
 
 ### 2. Face Emotion Detection
-- Analyzes facial expressions in images posted by MOCs
+- Analyzes facial expressions in images of detected faces of MOCs
 - Uses DeepFace to detect emotions (happiness, anger, sadness, etc.)
 - Output: Emotion detection results saved in `output/emotion_processed_images/` and combined in `output/output_combined.json`
 
 ### 3. Validation Happiness Detection
-- Processes validation images to verify the accuracy of emotion detection
-- Output: Validation results stored in `output/validation/`
+- Processes validation images to extract happiness scores of detected faces in the validation set
+- Output: Happiness scores stored in `output/validation/`
 
 ### 4. Validation Analysis
 - Analyzes the results of the validation process
