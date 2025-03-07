@@ -444,7 +444,7 @@ names(corpus_df)
 # Density plots (Figure 1) --------------------------------------------------
 
 # A) Summarize the total number of posts per bioguide for each gender
-post_counts <- fb_corpus %>%
+post_counts <- corpus_df %>%
   group_by(bioguide, gender) %>%
   summarise(total_posts = n()) %>%
   ungroup()
@@ -462,7 +462,7 @@ plot_post_counts <- ggplot(post_counts, aes(x = total_posts, fill = gender)) +
         legend.title = element_blank())
 
 # B) Summarize the total number of posts with images per bioguide for each gender
-image_post_counts <- fb_corpus %>%
+image_post_counts <- corpus_df %>%
   filter(image_flag == 1) %>%
   group_by(bioguide, gender) %>%
   summarise(total_image_posts = n()) %>%
@@ -481,7 +481,7 @@ plot_image_post_counts <- ggplot(image_post_counts, aes(x = total_image_posts, f
         legend.title = element_blank())
 
 # Calculate total reactions for each post
-temp_corpus <- fb_corpus %>%
+temp_corpus <- corpus_df %>%
   mutate(total_reactions = angry_count + care_count + haha_count + 
            like_count + love_count + sad_count + wow_count + 
            thankful_count + share_count)
@@ -523,7 +523,7 @@ plot_avg_happiness <- ggplot(average_happiness, aes(x = average_happiness, fill 
         legend.title = element_blank())
 
 # Summarize the average text positivity per bioguide for each gender
-average_text_positivity <- fb_corpus %>%
+average_text_positivity <- corpus_df %>%
   group_by(bioguide, gender) %>%
   summarise(average_positivity = mean(roberta_positive, na.rm = TRUE)) %>%
   ungroup()
@@ -1286,7 +1286,4 @@ if(nrow(multi_gender_bioguides) > 0) {
   }
 }
 
-sink() 
-
-
-
+sink()

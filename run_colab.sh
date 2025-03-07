@@ -72,8 +72,15 @@ echo "Running statistical analysis..."
 cd "$PROJECT_DIR/statistical-analysis"
 Rscript statistical_analysis4.R
 
+# Create a zip archive of the output directory
+echo "Creating zip archive of output..."
+cd "$PROJECT_DIR"
+zip -r output_results.zip output/
+
 # Copy results to Google Drive
 echo "Copying results to Google Drive..."
 cp -r "$OUTPUT_DIR"/* "$DRIVE_OUTPUT_DIR/"
+cp output_results.zip "$DRIVE_OUTPUT_DIR/"
 
-echo "Analysis pipeline complete! Results copied to $DRIVE_OUTPUT_DIR" 
+echo "Analysis pipeline complete! Results copied to $DRIVE_OUTPUT_DIR"
+echo "Zip archive of results saved to $DRIVE_OUTPUT_DIR/output_results.zip" 
